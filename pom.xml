@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>cc.redserv</groupId>
-    <artifactId>silkTouchSpawners</artifactId>
+    <artifactId>SilkTouchSpawners</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
 
@@ -48,10 +48,20 @@
     </repositories>
 
     <dependencies>
+        <!--Import of spigot api for javadoc-->
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>1.16.1-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!--Import of spigot, bukkit, nms, etc...-->
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot</artifactId>
             <version>1.16.1-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
