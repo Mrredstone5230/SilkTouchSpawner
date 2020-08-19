@@ -1,0 +1,18 @@
+#True: Mobs will be kept into mob spawners
+#False: Mobs will not be kept into mob spawners: They will only drop.
+keepTheMobOnBreak: true
+
+#Number of entities spawning in each "spawn round"
+SpawnCount: 4
+#Maximum number of entities around the spawner
+MaxNearbyEntities: 6
+#Spawning area around the spawner
+SpawnRange: 4
+#Minimum delay (in ticks) of a spawning round
+MinSpawnDelay: 200
+#Maximum delay (in ticks) of a spawning round
+MaxSpawnDelay: 800
+#Minimum distance required for a player around the spawner for it to work.
+RequiredPlayerRange: 16
+
+#More info of the above parameters on the wiki (https://minecraft.gamepedia.com/Spawner)

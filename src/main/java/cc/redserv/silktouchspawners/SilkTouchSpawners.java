@@ -1,10 +1,7 @@
 package cc.redserv.silktouchspawners;
 
-import net.minecraft.server.v1_16_R1.NBTTagCompound;
-import net.minecraft.server.v1_16_R1.NBTTagString;
 import org.bukkit.*;
 import org.bukkit.block.CreatureSpawner;
-import org.bukkit.craftbukkit.v1_16_R1.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
@@ -12,23 +9,26 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.SpawnEggMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class SilkTouchSpawners extends JavaPlugin implements Listener {
+
+    public static SilkTouchSpawners instance;
+    public static boolean MobKeepOnDrop = true;
 
     @Override
     public void onEnable() {
         // Plugin startup logic
         this.getServer().getPluginManager().registerEvents(this,this);
+        instance = this;
+        saveDefaultConfig();
+        MobKeepOnDrop = getConfig().getBoolean("keepTheMobOnBreak");
     }
 
     @Override
@@ -61,9 +61,11 @@ public final class SilkTouchSpawners extends JavaPlugin implements Listener {
         event.setDropItems(false);
         Location loc = event.getBlock().getLocation();
         World world = event.getBlock().getWorld();
-
-        ItemStack itemSpawner = setType(new ItemStack(Material.SPAWNER), ((CreatureSpawner)event.getBlock().getState()).getSpawnedType());
-
+        ItemStack itemSpawner;
+        if (MobKeepOnDrop)
+            itemSpawner = setType(new ItemStack(Material.SPAWNER), ((CreatureSpawner)event.getBlock().getState()).getSpawnedType());
+        else
+            itemSpawner = new ItemStack(Material.SPAWNER);
         world.dropItemNaturally(loc, itemSpawner);
     }
 
@@ -79,28 +81,28 @@ public final class SilkTouchSpawners extends JavaPlugin implements Listener {
 
         CreatureSpawner spawner = (CreatureSpawner) event.getBlock().getState();
         spawner.setSpawnedType(type);
+
+        spawner.setMaxNearbyEntities(SilkTouchSpawners.instance.getConfig().getInt("MaxNearbyEntities"));
+        spawner.setMaxSpawnDelay(SilkTouchSpawners.instance.getConfig().getInt("MaxSpawnDelay"));
+        spawner.setMinSpawnDelay(SilkTouchSpawners.instance.getConfig().getInt("MinSpawnDelay"));
+        spawner.setRequiredPlayerRange(SilkTouchSpawners.instance.getConfig().getInt("RequiredPlayerRange"));
+        spawner.setSpawnCount(SilkTouchSpawners.instance.getConfig().getInt("SpawnCount"));
+        spawner.setSpawnRange(SilkTouchSpawners.instance.getConfig().getInt("SpawnRange"));
+
         spawner.update();
     }
 
-
-
-
-
-
-
-
-
-
     public static EntityType getType(org.bukkit.inventory.ItemStack itemStack) {
-        net.minecraft.server.v1_16_R1.ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
-        NBTTagCompound nmsItemCompound = (nmsItem.hasTag()) ? nmsItem.getTag() : new NBTTagCompound();
-        if (nmsItemCompound == null) {
-            return null;
-        }
-        if (nmsItemCompound.isEmpty())
+
+        ItemStack itemStack2 = itemStack.clone();
+        NamespacedKey key = new NamespacedKey(instance, "MobType");
+        ItemMeta meta = itemStack2.getItemMeta();
+        PersistentDataContainer container = meta.getPersistentDataContainer();
+
+        if (!container.has(key, PersistentDataType.STRING))
             return null;
 
-        String mob = nmsItemCompound.getString("spawner_type");
+        String mob = container.get(key, PersistentDataType.STRING);
 
         EntityType entity = null;
         try {
@@ -111,15 +113,13 @@ public final class SilkTouchSpawners extends JavaPlugin implements Listener {
     }
 
     public static org.bukkit.inventory.ItemStack setType(org.bukkit.inventory.ItemStack itemStack, org.bukkit.entity.EntityType type) {
-        net.minecraft.server.v1_16_R1.ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
-        NBTTagCompound nmsItemCompound = (nmsItem.hasTag()) ? nmsItem.getTag() : new NBTTagCompound();
-        if (nmsItemCompound == null) {
-            return null;
-        }
-        nmsItemCompound.set("spawner_type", NBTTagString.a(type.name()));
-        nmsItem.setTag(nmsItemCompound);
+        ItemStack itemStack2 = itemStack.clone();
+        NamespacedKey key = new NamespacedKey(instance, "MobType");
+        ItemMeta meta = itemStack2.getItemMeta();
+        meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, type.name());
+        itemStack2.setItemMeta(meta);
 
-        return CraftItemStack.asBukkitCopy(nmsItem);
+        return itemStack2;
     }
 
 }

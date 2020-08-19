@@ -1,5 +1,5 @@
 name: SilkTouchSpawners
 version: ${project.version}
 main: cc.redserv.silktouchspawners.SilkTouchSpawners
-api-version: 1.16
+api-version: 1.14
 authors: [Mr_redstone5230]
